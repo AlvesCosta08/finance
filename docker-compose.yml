@@ -9,4 +9,6 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./db_data:/var/lib/postgresql/data
+      - C:/Users/alves/go/src/github.com/finance/db_data:/var/lib/postgresql/data
+      - C:/Users/alves/go/src/github.com/finance/db/migration:/migration
+
