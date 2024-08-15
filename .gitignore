@@ -1,0 +1,33 @@
+# Ignorar arquivos de backup
+*~
+
+# Ignorar arquivos temporários do sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar arquivos compilados e binários
+*.exe
+*.o
+*.so
+
+# Ignorar diretórios de dependências de linguagem
+node_modules/
+vendor/
+.venv/
+
+# Ignorar arquivos de ambiente
+.env
+
+# Ignorar arquivos gerados pelo sistema operacional
+.vscode/
+.idea/
+
+# Ignorar build e artefatos
+/build/
+/dist/
+
+# Ignorar arquivos específicos de configuração local
+docker-compose.override.yml
