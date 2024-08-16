@@ -40,3 +40,5 @@ Este projeto é uma aplicação financeira fullstack desenvolvida com tecnologia
    git clone https://github.com/AlvesCosta08/finance
    cd repositorio
 
+#### Jira 
+https://alvescosta74-1720442219776.atlassian.net/jira/software/projects/FIN
