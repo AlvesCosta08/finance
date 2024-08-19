@@ -1,13 +1,17 @@
 package utils
 
-import(
+import (
 	"fmt"
 	"math/rand"
 	"strings"
-	
+	"time"
 )
 
 const alphabet = "abcdefghijlmnopqrstuvxz"
+
+func init()  {
+	rand.Seed(time.Now().UnixNano())
+}
 
 func RandomStrig(number int)  string{
 	var sb strings.Builder
