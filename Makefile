@@ -1,14 +1,49 @@
-DB_CONTAINER := finance
-DB_USER := postgres
-DB_NAME := go_finance
+name: ci
 
-migrateup:
-	docker exec -i $(DB_CONTAINER) psql -U $(DB_USER) -d $(DB_NAME) -f /migration/000001_initial_tables.up.sql
+on: 
+  push: 
+    branches: [ main ] 
+  pull_request: 
+    branches: [ main ] 
 
-migrationdrop:
-	docker exec -i $(DB_CONTAINER) psql -U $(DB_USER) -d $(DB_NAME) -f /migration/000001_initial_tables.down.sql
+jobs: 
+  
+  test: 
+    name: Run Test
+    runs-on: ubuntu-latest
 
-test:
-go test -v -cover ./...
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: go_finance
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
 
-.PHONY: crateDb postgres migrateup migrationdrop test
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.15
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Install golang-migrate
+      run: |
+        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.12.2/migrate.linux-amd64.tar.gz | tar xvz
+        sudo mv migrate.linux-amd64 /usr/bin/migrate
+        which migrate
+    - name: Run migrations
+      run: make migrateup
+
+    - name: Run Test
+      run: make test
