@@ -1,49 +1,32 @@
-name: ci
+# Makefile
 
-on: 
-  push: 
-    branches: [ main ] 
-  pull_request: 
-    branches: [ main ] 
+# Comando para criar o banco de dados
+createdb:
+	createdb --username=postgres --owner=postgres go_finance
 
-jobs: 
-  
-  test: 
-    name: Run Test
-    runs-on: ubuntu-latest
+# Comando para iniciar o container PostgreSQL
+postgres:
+	docker run --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres -d postgres:14-alpine
 
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: go_finance
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
+# Comando para executar migrações para cima
+migrateup:
+	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/go_finance?sslmode=disable" -verbose up
 
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.15
-      id: go
+# Comando para reverter migrações
+migrationdrop:
+	migrate -path db/migration -database "postgresql://postgres:postgres@localhost:5432/go_finance?sslmode=disable" -verbose down
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+# Comando para rodar testes
+test:
+	go test -v -cover ./...
 
-    - name: Install golang-migrate
-      run: |
-        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.12.2/migrate.linux-amd64.tar.gz | tar xvz
-        sudo mv migrate.linux-amd64 /usr/bin/migrate
-        which migrate
-    - name: Run migrations
-      run: make migrateup
+# Comando para iniciar o servidor
+server:
+	go run main.go
 
-    - name: Run Test
-      run: make test
+# Comando para gerar código com sqlc
+sqlc-gen:
+	docker run --rm -v $(shell pwd):/src -w /src kjconroy/sqlc generate
+
+# Define os targets que não são arquivos
+.PHONY: createdb postgres migrateup migrationdrop test server sqlc-gen
