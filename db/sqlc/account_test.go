@@ -95,7 +95,7 @@ func TestListAccounts(t *testing.T) {
 
 	lastAccount := createRandomAccount(t)
 
-	arg := GettAccountParams{   
+	arg :=GettAccountParams{   
 	  UserID:  lastAccount.UserID,
 	  Type: lastAccount.Type,
 	  CategoryID: lastAccount.CategoryID,
@@ -104,18 +104,46 @@ func TestListAccounts(t *testing.T) {
 	  Description: lastAccount.Description,
 	}
 
-	accounts , err := testQueries.GetAccount(context.Background(),arg)
+	accounts , err := testQueries.GettAccount(context.Background(),arg)
 	require.NoError(t,err)
 	require.NotEmpty(t,accounts)
 
 	for _,account := range accounts{
-		require.Equal(t, lastAccount.ID,account.ID)
+		require.Equal(t, lastAccount.ID,account.ID)		
 		require.Equal(t, lastAccount.UserID,account.UserID)
 		require.Equal(t, lastAccount.Title,account.Title)
 		require.Equal(t, lastAccount.Description,account.Description)
-		require.NotEmpty(t,lastAccount.CreatedAt)	
-		
+		require.Equal(t, lastAccount.Value,account.Value)
+		require.NotEmpty(t,lastAccount.CreatedAt)
+		require.NotEmpty(t,lastAccount.Date)		
+	}
+}
+	func TestListGetReports(t *testing.T) {
+
+	lastAccount := createRandomAccount(t)
+
+	arg :=GetAccountReportsParams{   
+	  UserID:  lastAccount.UserID,
+	  Type: lastAccount.Type,
 	}
 
+	sumValue , err := testQueries.GetAccountReports(context.Background(),arg)
+	require.NoError(t,err)
+	require.NotEmpty(t,sumValue)
+
+}
+
+func TestListGetGraph(t *testing.T) {
+
+	lastAccount := createRandomAccount(t)
+
+	arg :=GetAccountGraficParams{   
+	  UserID:  lastAccount.UserID,
+	  Type: lastAccount.Type,
+	}
+
+	graficValue , err := testQueries.GetAccountGrafic(context.Background(),arg)
+	require.NoError(t,err)
+	require.NotEmpty(t,graficValue)
 
 }
