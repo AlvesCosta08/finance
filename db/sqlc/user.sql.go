@@ -44,6 +44,11 @@ FROM users
 WHERE username = $1 
 LIMIT 1
 `
+type GetAllUserParams struct {
+    Username string `json:"username"`
+    Password string `json:"password"`
+    Email    string `json:"email"`
+}
 
 func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, username)
@@ -77,3 +82,59 @@ func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
 	)
 	return i, err
 }
+
+const listAllUser = `-- name: ListUsers :many
+SELECT id, username, password, email, created_at 
+FROM users
+ORDER BY id `
+
+func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
+    rows, err := q.db.QueryContext(ctx, "SELECT id, username, password, email, created_at FROM users ORDER BY id")
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var users []User
+    for rows.Next() {
+        var i User
+        if err := rows.Scan(&i.ID, &i.Username, &i.Password, &i.Email, &i.CreatedAt); err != nil {
+            return nil, err
+        }
+        users = append(users, i)
+    }
+
+    return users, rows.Err()
+}
+
+
+const updateUser = `-- name: UpdateUser :exec
+UPDATE users
+SET username = $2, password = $3, email = $4
+WHERE id = $1
+`
+
+type UpdateUserParams struct {
+    ID       int32  `json:"id"`
+    Username string `json:"username"`
+    Password string `json:"password"`
+    Email    string `json:"email"`
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
+    _, err := q.db.ExecContext(ctx, "UPDATE users SET username = $2, password = $3, email = $4 WHERE id = $1",
+        arg.ID, arg.Username, arg.Password, arg.Email)
+    return err
+}
+
+
+
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users
+WHERE id = $1`
+
+func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
+	_, err := q.db.ExecContext(ctx, deleteUser, id)
+	return err
+}
+
